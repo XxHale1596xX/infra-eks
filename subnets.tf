@@ -46,7 +46,7 @@ resource "aws_subnet" "public-us-east-2b" {
     tags = {
       "Name"                                = "public-us-east-2b"
       "kubernetes.io/role/elb"              = "1"
-      "kuberntes.io/cluster/demo"           = "owned" 
+      "kuberntes.io/cluster/demo"           = "owned"
     }
   
 }
