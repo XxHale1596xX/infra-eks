@@ -1,5 +1,5 @@
 resource "aws_iam_role" "eks" {
-  name = "eks-cluster-eks"
+  name = "eks-cluster"
 
   assume_role_policy = <<POLICY
 {
@@ -28,12 +28,14 @@ resource "aws_eks_cluster" "eks_cluster" {
 
   vpc_config {
     subnet_ids = [
-      aws_subnet.private-us-east-2a.id,
-      aws_subnet.private-us-east-2b.id,
-      aws_subnet.public-us-east-2a.id,
-      aws_subnet.public-us-east-2b.id
+      aws_subnet.private-us-east-1a.id,
+      aws_subnet.private-us-east-1b.id,
+      aws_subnet.public-us-east-1a.id,
+      aws_subnet.public-us-east-1b.id
     ]
   }
+
+  
 
   depends_on = [aws_iam_role_policy_attachment.eks-AmazonEKSClusterPolicy]
 }
