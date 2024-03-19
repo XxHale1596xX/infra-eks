@@ -1,0 +1,45 @@
+name: Create eks
+
+on:
+  push:
+    branches:
+      - main  # ou a branch desejada
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        run: |
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "[default]" > ~/.aws/config
+          echo "region=${{ secrets.AWS_REGION }}" >> ~/.aws/config
+
+      - name: Check if S3 bucket exists
+        run: |
+            if aws s3api head-bucket --bucket my-terraform-state-bucket 2>/dev/null; then
+              echo "Bucket already exists"
+            else
+              echo "Bucket does not exist, creating..."
+              aws s3api create-bucket --bucket my-terraform-state-bucket --region ${{ secrets.AWS_REGION }} --create-bucket-configuration LocationConstraint=${{ secrets.AWS_REGION }}
+            fi
+      - name: Initialize Terraform
+        run: terraform init
+  
+      - name: Validate Terraform configuration
+        run: terraform validate
+  
+      - name: Apply Terraform changes
+        run: terraform apply -auto-approve
+            
+      - name: Move Terraform state to S3 bucket
+        run: |
+            mv terraform.tfstate* "s3://my-terraform-state-bucket/"
